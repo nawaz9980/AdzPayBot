@@ -1,0 +1,8 @@
+{
+  "name": "reward-group-bot",
+  "version": "1.0.0",
+  "dependencies": {
+    "telegraf": "^4.12.2",
+    "mysql2": "^3.3.4"
+  }
+}
