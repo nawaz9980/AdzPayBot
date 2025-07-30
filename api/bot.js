@@ -19,21 +19,32 @@ bot.use(async (ctx, next) => {
 });
 
 // Admin replies to group user with number to credit
+// Admin replies to group user with amount to reward
 bot.on('message', async (ctx) => {
   const chat = ctx.chat;
   const isGroup = chat.type.endsWith('group');
 
   if (!isGroup || !ctx.message.reply_to_message || !ADMIN_IDS.includes(ctx.from.id)) return;
 
-  const reward = parseFloat(ctx.message.text);
-  const repliedUser = ctx.message.reply_to_message.from;
+  const reward = parseFloat(ctx.message.text.trim());
+  if (isNaN(reward) || reward <= 0) return;
 
-  if (!isNaN(reward) && reward > 0) {
-    await pool.execute('UPDATE users SET balance = balance + ? WHERE id = ?', [reward, repliedUser.id]);
+  const targetUser = ctx.message.reply_to_message.from;
 
-    await ctx.reply(`💰 Credited $${reward} to @${repliedUser.username || repliedUser.first_name}`);
-  }
+  // Save user if not already in DB
+  await pool.execute(
+    `INSERT INTO users (id, username, first_name, balance)
+     VALUES (?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       username = VALUES(username),
+       first_name = VALUES(first_name),
+       balance = balance + VALUES(balance)`,
+    [targetUser.id, targetUser.username, targetUser.first_name, reward]
+  );
+
+  await ctx.reply(`✅ Credited $${reward} to ${targetUser.username ? '@' + targetUser.username : targetUser.first_name}`);
 });
+
 
 // /balance command
 bot.command('balance', async (ctx) => {
