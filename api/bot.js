@@ -3,7 +3,7 @@ const pool = require('../db');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const ADMIN_IDS = [123456789]; // replace with your admin Telegram ID
+const ADMIN_IDS = [1913794746]; // replace with your admin Telegram ID
 const MIN_WITHDRAW = 50;
 
 // Save user on any interaction
